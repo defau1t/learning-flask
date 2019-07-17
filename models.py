@@ -5,7 +5,9 @@ import geocoder
 import urllib.request
 from urllib.parse import urljoin
 import json
+import os
 
+GEOCODING_API_KEY = os.environ['GEOCODING_API_KEY']
 
 db = SQLAlchemy()
 
@@ -38,7 +40,7 @@ class Place(object):
         return urljoin("http://en.wikipedia.org/wiki/", slug.replace(' ', '_'))
 
     def address_to_latlng(self, address):
-        g = geocoder.google(address)
+        g = geocoder.google(address, key=GEOCODING_API_KEY)
         return (g.lat, g.lng)
 
     def query(self, address):
@@ -47,7 +49,8 @@ class Place(object):
 
         query_url = f'https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=5000&gscoord={lat}%7C{lng}&gslimit=20&format=json'
         g = urllib.request.urlopen(query_url)
-        results = g.read()
+        charset=g.info().get_content_charset()
+        results = g.read().decode(charset)
         g.close()
 
         data = json.loads(results)
@@ -57,7 +60,7 @@ class Place(object):
             name = place['title']
             meters = place['dist']
             lat = place['lat']
-            lng = place['lng']
+            lng = place['lon']
 
             wiki_url = self.wiki_path(name)
             walking_time = self.meters_to_walking_time(meters)
