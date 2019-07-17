@@ -4,8 +4,61 @@
   <main class="hero-section">
     <div class="container">
 
-      <h1>Home</h1>
+      <div class="section-tabs">
+        <div class="places">
+          {% for place in places %}
+            <article>
+              <a class="name" href="{{ place['url' }}" target="_blank">{{ place['name'] }}</a>
+              <p class="walking-distance">{{ place['time'] }} min away</p>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
 
+      <div class="section-map">
+        <div class="nav">
+          <form method="POST" action="/home">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+              {% if form.address.errors %}
+                {% for error in form.address.errors %}
+                  <p class="error-message">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+
+              {{ form.address(placeholder="Explore nearby places.") }}
+            </div>
+
+            {{ form.submit(class="btn-primary") }}
+          </form>
+        </div>
+
+        <div id="map"></div>
+      </div>
+
+      <div class="clearfix"></div>
     </div>
   </main>
+
+  <script>
+    var planes = [
+      {% for place in places %}
+        ["<h3><a href='{{ place['url'] }}' target='_blank'>{{ place['name'] }}</a></h3> <p> {{ place['time'] }} min away</p>", {{ place['lat'] }}, {{ place['lng'] }} ],
+      {% endfor %}
+    ];
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox.streets',
+        accessToken: 'pk.eyJ1IjoiZGVmYXUxdCIsImEiOiJjank2ZXk3ZGYwN2l0M2pybmM5d2NpN2JkIn0.jP1ZUf-qVdoMjAARgRPTJg'
+    }).addTo(mymap);
+
+    for (var i = 0; i < planes.length; i++) {
+      marker = new L.marker([planes[i][1],planes[i][2]])
+        .bindPopup(planes[i][0])
+        .addTo(map);
+    }
+  </script>
 {% endblock %}
