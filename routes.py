@@ -6,6 +6,7 @@ import os
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 app.secret_key = "development-key"
@@ -80,7 +81,7 @@ def home():
 
     if request.method == 'POST':
         if form.validate() == False:
-            return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places)
+            return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places, MAPBOX_KEY=os.environ['MAPBOX_KEY'])
         else:
             # get the address
             address = form.address.data
@@ -91,10 +92,10 @@ def home():
             places = p.query(address)
 
             # return those results
-            return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places)
+            return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places, MAPBOX_KEY=os.environ['MAPBOX_KEY'])
 
     elif request.method == 'GET':
-        return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places)
+        return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places, MAPBOX_KEY=os.environ['MAPBOX_KEY'])
 
 
 if __name__ == "__main__":
